@@ -364,7 +364,7 @@ class BlogPageHooks {
 		global $wgUserProfileDisplay, $wgMemc, $wgOut;
 
 		if ( !$wgUserProfileDisplay['articles'] ) {
-			return '';
+			return true;
 		}
 
 		$user_name = $userProfile->user_name;
@@ -392,8 +392,8 @@ class BlogPageHooks {
 					$user_name
 				)->inContentLanguage()->text()
 			);
-			if($categoryTitle == null){
-				return '';
+			if( $categoryTitle == null ){
+				return true;
 			}
 
 			$dbr = wfGetDB( DB_SLAVE );
