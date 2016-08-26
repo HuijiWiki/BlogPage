@@ -349,8 +349,7 @@ class BlogPageHooks {
 	public static function decrOpinionCount( &$article, User &$user, $reason, &$error, &$status, $suppress ) { 
 		if ( $article->getTitle()->getNamespace() == NS_BLOG ){
 			$origUserId = $article->getTitle()->getFirstRevision()->getUser();
-			$origUserName = User::nameFromId( $origUserId );
-			$stats = new UserStatsTrack( $origUserId, $origUserName );
+			$stats = new UserStatsTrack( $origUserId );
 			$stats->decStatField( 'opinions_created' );			
 		} 		
 	}
