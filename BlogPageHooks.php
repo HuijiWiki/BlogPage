@@ -392,6 +392,9 @@ class BlogPageHooks {
 					$user_name
 				)->inContentLanguage()->text()
 			);
+			if($categoryTitle == null){
+				return '';
+			}
 
 			$dbr = wfGetDB( DB_SLAVE );
 			/**
@@ -475,7 +478,7 @@ class BlogPageHooks {
 							"\">{$articleTitle->getText()}</a>
 						<span class=\"item-small secondary\">" .
 							wfMessage( 'blog-user-article-comment' )
-								->numParams( $commentCount )
+								->numParams( $UserStats )
 								->escaped() . '</span>
 					</span>
 				</div>';
