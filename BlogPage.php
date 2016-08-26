@@ -163,7 +163,7 @@ $wgHooks['SkinGetSub'][] = 'BlogPageHooks::onSkinGetSub';
 $wgHooks['SkinTemplateNavigation::Universal'][] = 'BlogPageHooks::onSkinTemplateNavigation_Universal';
 $wgHooks['UserGetRights'][] = 'BlogPageHooks::AssignAuthor';
 $wgHooks['PageContentInsertComplete'][] = 'BlogPageHooks::incrOpinionCount';
-$wgHooks['ArticleDeleteComplete'][] = 'BlogPageHooks::decrOpinionCount';
+$wgHooks['ArticleDelete'][] = 'BlogPageHooks::decrOpinionCount';
 $wgHooks['EditPageBeforeEditChecks'][] = 'BlogPageHooks::onEditPageBeforeEditChecks';
 // UserProfile integration
 $wgHooks['UserProfileBeginLeft'][] = 'BlogPageHooks::getArticles';

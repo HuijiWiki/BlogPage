@@ -346,7 +346,7 @@ class BlogPageHooks {
 
 
 	}
-	public static function decrOpinionCount( &$article, User &$user, $reason, $id, Content $content = null, LogEntry $logEntry ) { 
+	public static function decrOpinionCount( &$article, User &$user, $reason, &$error, &$status, $suppress ) { 
 		if ( $article->getTitle()->getNamespace() == NS_BLOG ){
 			$origUserId = $article->getTitle()->getFirstRevision()->getUser();
 			$origUserName = User::nameFromId( $origUserId );
