@@ -343,8 +343,6 @@ class BlogPageHooks {
 				$user
 			);
 		} 
-
-
 	}
 	public static function decrOpinionCount( &$article, User &$user, $reason, &$error, &$status, $suppress ) { 
 		if ( $article->getTitle()->getNamespace() == NS_BLOG ){
@@ -352,6 +350,10 @@ class BlogPageHooks {
 			$stats = new UserStatsTrack( $origUserId );
 			$stats->decStatField( 'opinions_created' );			
 		} 		
+	}
+
+	public static function onPreloadGetInput( $preload, $html){
+		$html += "<option value=''>博客</option>";
 	}
 	/**
 	 * Show a list of this user's blog articles in their user profile page.
