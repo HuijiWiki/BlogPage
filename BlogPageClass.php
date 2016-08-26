@@ -1003,7 +1003,7 @@ class BlogPage extends Article {
 		global $wgMemc;
 
 		// Try cache first
-		$key = wfMemcKey( 'blog', 'comments', 'count' );
+		$key = wfMemcKey( 'blog', 'comments', 'count', $id );
 		$data = $wgMemc->get( $key );
 
 		if ( $data != '' ) {
