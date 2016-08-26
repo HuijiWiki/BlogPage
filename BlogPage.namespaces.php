@@ -63,3 +63,9 @@ $namespaceNames['ru'] = array(
 	NS_BLOG => 'Блог',
 	NS_BLOG_TALK => 'Обсуждение_блога'
 );
+
+/** Russian (Русский) */
+$namespaceNames['zh-cn'] = array(
+	NS_BLOG => '博客',
+	NS_BLOG_TALK => '博客_讨论'
+);

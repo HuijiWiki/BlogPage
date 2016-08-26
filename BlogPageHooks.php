@@ -17,7 +17,6 @@ class BlogPageHooks {
 	 */
 	public static function blogFromTitle( &$title, &$article ) {
 		global $wgHooks, $wgOut, $wgRequest, $wgSupressPageTitle, $wgSupressSubTitle, $wgSupressPageCategories;
-
 		if ( $title->getNamespace() == NS_BLOG ) {
 			if ( !$wgRequest->getVal( 'action' ) ) {
 				$wgSupressPageTitle = true;
@@ -32,7 +31,7 @@ class BlogPageHooks {
 				return true;
 			};
 
-			$wgOut->enableClientCache( false );
+			// $wgOut->enableClientCache( false );
 
 			// Add CSS
 			$wgOut->addModuleStyles( 'ext.blogPage' );
@@ -42,7 +41,50 @@ class BlogPageHooks {
 
 		return true;
 	}
+	public static function onSkinGetSub( $title, &$res ){
+		global $wgUser;
+		if ( $title->exists() && $title->getNamespace() == NS_BLOG ) {
+			$authorId = $title->getFirstRevision()->getUser();
+			$author = User::newFromId($authorId);
+            $linkAttr = array('class' => 'mw-ui-anchor mw-ui-progressive mw-ui-quiet', 'rel'=>'nofollow');
+            $editorAttr = array('class' => 'mw-ui-anchor mw-ui-progressive mw-ui-quiet mw-userlink', 'rel'=>'nofollow');
+        	$authorLink = Linker::linkKnown($author->getUserPage(), $author->getName(), $editorAttr);
+        	$bjtime = strtotime( $title->getFirstRevision()->getTimestamp() ) + 8*60*60;
+        	$createtime = HuijiFunctions::getTimeAgo( $bjtime );
+        	$diff = SpecialPage::getTitleFor('Diff',$revId);
+            $diffLink = Linker::LinkKnown($diff,'创作于',$linkAttr);
+            $thankLink = '';
+            if ( class_exists( 'EchoNotifier' )
+                && $wgUser->isLoggedIn() 
+                && $wgUser->getId() !== $authorId
+            ) {
+                // Load the module for the thank links
+                $thankLink .= '（<a class="mw-ui-anchor mw-ui-progressive mw-ui-quiet mw-thanks-thank-link" data-revision-id="'
+                    .$title->getFirstRevision()->getId().'" href="javascript:void(0);">'.wfMessage('thanks-thank').'</a>）';
+            }
+            //Make it a td to reuse ext.thank.revthank   
+            $res.= $authorLink.'&nbsp'.$diffLink.$createtime.'前'.$thankLink;
+       		return false;
 
+		}
+	}
+	public static function onSkinTemplateNavigation_Universal( &$sktemplate, &$links ) {
+		global $wgUser;
+		$ns = $sktemplate->getSkin()->getTitle()->getNamespace();
+		//print_r($links);
+		if ( $sktemplate->getSkin()->getTitle()->exists() && $ns == NS_BLOG && $wgUser->getId() != $sktemplate->getSkin()->getTitle()->getFirstRevision()->getUser()){
+			unset($links['views']['edit']);
+			unset($links['views']['ve-edit']);
+		}
+		// $action = $request->getText( 'action' );
+		// $links['views']['chat'] = array(
+		// 	'class' => ( $action == 'chat') ? 'selected' : false,
+		// 	'text' => "Chat",
+		// 	'href' => $sktemplate->makeArticleUrlDetails(
+		// 		$sktemplate->getTitle()->getFullText(), 'action=chat' )['href']
+		// );
+		return true;		
+	}
 	/**
 	 * Checks that the user is logged is, is not blocked via Special:Block and has
 	 * the 'edit' user right when they're trying to edit a page in the NS_BLOG NS.
@@ -64,16 +106,102 @@ class BlogPageHooks {
 				}
 				return false;
 			}
-
 			if ( !$user->isAllowed( 'edit' ) || $user->isBlocked() ) {
 				$output->addWikiMsg( 'blog-permission-required' );
 				return false;
 			}
+			if ( $user->getId() != $editPage->mTitle->getFirstRevision()->getUser() || !$user->isAllowed('edit-others-blog') ){
+				$output->addWikiMsg( 'blog-not-your-post' );
+				return false;
+			}
+
+
 		}
 
 		return true;
 	}
+	public static function onEditPageBeforeEditChecks(&$editpage, &$checkboxes, &$tabindex ){
+		global $wgUseMediaWikiUIEverywhere;
+		$originalLabel = wfMessage('originalwork')->parse();
+		$checkboxes['original'] = '';
+		if ( $editpage->getTitle()->getNamespace() == NS_BLOG ){
+			$attribs = [
+				'tabindex' => ++$tabindex,
+				'accesskey' => wfMessage( 'accesskey-original' )->text(),
+				'id' => 'hpChangeTags',
+				'value' => 'originalwork'
+			];
+			$originalHtml = 
+				Xml::check( 'hpChangeTags', false, $attribs ) .
+				"&#160;<label for='hpChangeTags' id='mw-editpage-original'" .
+				Xml::expandAttributes( [ 'title' => Linker::titleAttrib( 'original', 'withaccess' ) ] ) .
+				">{$originalLabel}</label>";
+			if ( $wgUseMediaWikiUIEverywhere ) {
+                $checkboxes['original'] = Html::openElement( 'div', [ 'class' => 'mw-ui-checkbox' ] ) .
+                    $originalHtml .
+                    Html::closeElement( 'div' );
+            } else {
+                $checkboxes['original'] = $originalHtml;
+            }				
+		}  
+	}
 
+	/**
+	 * RecentChange_save hook handler that tags staff edits as such when
+	 * requested.
+	 *
+	 * @param RecentChange $rc
+	 * @return bool
+	 */
+	public static function onRecentChange_save( RecentChange $rc ) {
+		global $wgRequest;
+		// Paranoia -- permission check, just in case
+		if ( !$rc->getPerformer()->isAllowed( 'edit-others-blog' ) ) {
+			return true;
+		}
+		$addTag = $wgRequest->getVal( 'hpChangeTags' ) === 'originalwork';
+		$source = $rc->getAttribute( 'rc_source' );
+		// Only apply the tag for edits, nothing else, and only if we were given
+		// a tag to apply (!)
+		if ( in_array( $source, array( RecentChange::SRC_EDIT, RecentChange::SRC_NEW ) ) && $addTag ) {
+			$rcId = $rc->getAttribute( 'rc_id' );
+			$revId = $rc->getAttribute( 'rc_this_oldid' );
+			// In the future we might want to support different
+			// types of staff edit tags
+			ChangeTags::addTags( 'originalwork', $rcId, $revId );
+		}
+		return true;
+	}
+
+    public static function onRegisterTags( array &$tags ) {
+        $tags[] = 'originalwork';
+        return true;
+    }
+	public static function AssignAuthor( $user, &$aRights ) {
+		global $wgTitle;
+		// don't assign author to anons... messes up logging stuff.
+		// plus it's all user_id based so it is impossible to differentiate one anon from another
+		if ($wgTitle->getNamespace() != NS_BLOG ){
+			return true;
+		}
+		if ($wgTitle->getFirstRevision() == null){
+			$aRights[] = 'edit-others-blog';
+			$aRights[] = 'applychangetags';
+			$aRights = array_unique( $aRights );
+			return true;			
+		}
+		if ( $user->getId() == $wgTitle->getFirstRevision()->getUser() ) {
+			$aRights[] = 'edit-others-blog';
+			$aRights[] = 'applychangetags';
+			$aRights = array_unique( $aRights );
+		}
+		return true;
+	}
+	// public static function onChangeTagCanCreate( $tag, $user, &$canCreateResult){
+	// 	if ($tag === 'originalwork'){
+	// 		$canCreateResult == 
+	// 	}
+	// }
 	/**
 	 * This function was originally in the UserStats directory, in the file
 	 * CreatedOpinionsCount.php.
@@ -90,6 +218,8 @@ class BlogPageHooks {
 	 */
 	public static function updateCreatedOpinionsCount( &$article, &$user ) {
 		$aid = $article->getTitle()->getArticleID();
+		$u = $article->getTitle()->getFirstRevision()->getUser();
+		$user_name = User::nameFromId($u);
 		// Shortcut, in order not to perform stupid queries (cl_from = 0...)
 		if ( $aid == 0 ) {
 			return true;
@@ -179,6 +309,51 @@ class BlogPageHooks {
 		return true;
 	}
 
+	public static function incrOpinionCount($wikiPage, User $user, $content, $summary, $isMinor,$isWatch, $section, $flags, Revision $revision){
+		global $wgContLang;
+		if ( $wikiPage->getTitle()->getNamespace() == NS_BLOG ){
+			$stats = new UserStatsTrack( $user->getId(), $user->getName() );
+			$stats->incStatField( 'opinions_created' );	
+			$localizedCategoryNS = $wgContLang->getNsText( NS_CATEGORY );	
+			$today = $wgContLang->date( wfTimestampNow() );
+			// The blog post will be by default categorized into two
+			// categories, "Articles by User $1" and "(today's date)",
+			// but the user may supply some categories themselves, so
+			// we need to take those into account, too.
+			$categories = array(
+				'[[' . $localizedCategoryNS . ':' .
+					wfMessage(
+						'blog-by-user-category',
+						$user->getName()
+					)->inContentLanguage()->text() .
+				']]' . "\n" .
+				"[[{$localizedCategoryNS}:{$today}]]"
+			);
+			// Convert the array into a string
+			$text = ContentHandler::getContentText($content);
+			$wikitextCategories = implode( "\n", $categories );
+			
+			// Perform the edit
+			$newContent = ContentHandler::makeContent($text."\n".$wikitextCategories."\n__NOEDITSECTION__", $wikiPage->getTitle());
+			$wikiPage->doEditContent(
+				$newContent,
+				wfMessage( 'blog-create-summary' )->inContentLanguage()->text(),
+				0,
+				false,
+				$user
+			);
+		} 
+
+
+	}
+	public static function decrOpinionCreated( &$article, User &$user, $reason, $id, Content $content = null, LogEntry $logEntry ) { 
+		if ( $article->getTitle()->getNamespace() == NS_BLOG ){
+			$origUserId = $article->getTitle()->getFirstRevision()->getUser();
+			$origUserName = User::nameFromId( $origUserId );
+			$stats = new UserStatsTrack( $origUserId, $origUserName );
+			$stats->decStatField( 'opinions_created' );			
+		} 		
+	}
 	/**
 	 * Show a list of this user's blog articles in their user profile page.
 	 *
@@ -264,7 +439,7 @@ class BlogPageHooks {
 		);
 
 		if ( count( $articles ) > 0 ) {
-			$output .= '<div class="user-section-heading">
+			$output .= '<div class="panel panel-primary darken no-border"><div class="user-section-heading panel-heading">
 				<div class="user-section-title">' .
 					wfMessage( 'blog-user-articles-title' )->escaped() .
 				'</div>
@@ -277,53 +452,37 @@ class BlogPageHooks {
 			$output .= '</div>
 					<div class="action-left">' .
 					wfMessage( 'user-count-separator' )
-						->numParams( $articleCount, count( $articles ) )
+						->numParams( count( $articles ), $articleCount )
 						->escaped() . '</div>
-					<div class="visualClear"></div>
+					<div class="clearfix"></div>
 				</div>
 			</div>
-			<div class="visualClear"></div>
-			<div class="user-articles-container">';
+			<div class="panel-body user-articles-container">';
 
-			$x = 1;
+
 
 			foreach ( $articles as $article ) {
 				$articleTitle = Title::makeTitle(
 					$article['page_namespace'],
 					$article['page_title']
 				);
-				$voteCount = BlogPage::getVotesForPage( $article['page_id'] );
+				// $voteCount = BlogPage::getVotesForPage( $article['page_id'] );
 				$commentCount = BlogPage::getCommentsForPage( $article['page_id'] );
-
-				if ( $x == 1 ) {
-					$divClass = 'article-item-top';
-				} else {
-					$divClass = 'article-item';
-				}
-				$output .= '<div class="' . $divClass . "\">
-					<div class=\"number-of-votes\">
-						<div class=\"vote-number\">{$voteCount}</div>
-						<div class=\"vote-text\">" .
-							wfMessage( 'blog-user-articles-votes' )
-								->numParams( $voteCount )
-								->escaped() .
-						'</div>
-					</div>
-					<div class="article-title">
+				$divClass = 'activity-item';
+				$output .= '<div class="' . $divClass . "\">".
+					'<span class="article-title"><i class="fa fa-rss-square" aria-hidden="true"></i>
 						<a href="' . htmlspecialchars( $articleTitle->getFullURL() ) .
 							"\">{$articleTitle->getText()}</a>
-						<span class=\"item-small\">" .
+						<span class=\"item-small secondary\">" .
 							wfMessage( 'blog-user-article-comment' )
 								->numParams( $commentCount )
 								->escaped() . '</span>
-					</div>
-					<div class="visualClear"></div>
+					</span>
 				</div>';
 
-				$x++;
 			}
 
-			$output .= '</div>';
+			$output .= '</div></div>';
 		}
 
 		$wgOut->addHTML( $output );

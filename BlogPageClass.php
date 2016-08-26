@@ -53,16 +53,16 @@ class BlogPage extends Article {
 	public function view() {
 		global $wgBlogPageDisplay;
 
-		$context = $this->getContext();
-		$user = $context->getUser();
-		$output = $context->getOutput();
+		// $context = $this->getContext();
+		// $user = $context->getUser();
+		// $output = $context->getOutput();
 
-		$sk = $context->getSkin();
+		// $sk = $context->getSkin();
 
-		wfDebugLog( 'BlogPage', __METHOD__ );
+		// wfDebugLog( 'BlogPage', __METHOD__ );
 
-		$output->setHTMLTitle( $this->getTitle()->getText() );
-		$output->setPageTitle( $this->getTitle()->getText() );
+		// $output->setHTMLTitle( $this->getTitle()->getText() );
+		// $output->setPageTitle( $this->getTitle()->getText() );
 
 		// Don't throw a bunch of E_NOTICEs when we're viewing the page of a
 		// nonexistent blog post
@@ -71,75 +71,75 @@ class BlogPage extends Article {
 			return '';
 		}
 
-		$output->addHTML( "\t\t" . '<div id="blog-page-container">' . "\n" );
+		// $output->addHTML( "\t\t" . '<div id="blog-page-container">' . "\n" );
 
-		if ( $wgBlogPageDisplay['leftcolumn'] == true ) {
-			$output->addHTML( "\t\t\t" . '<div id="blog-page-left">' . "\n" );
+		// if ( $wgBlogPageDisplay['leftcolumn'] == true ) {
+		// 	$output->addHTML( "\t\t\t" . '<div id="blog-page-left">' . "\n" );
 
-			$output->addHTML( "\t\t\t\t" . '<div class="blog-left-units">' . "\n" );
+		// 	$output->addHTML( "\t\t\t\t" . '<div class="blog-left-units">' . "\n" );
 
-			$output->addHTML(
-				"\t\t\t\t\t" . '<h2>' .
-				wfMessage( 'blog-author-title' )
-					->numParams( count( $this->authors ) )
-					->escaped() . '</h2>' . "\n"
-			);
+		// 	$output->addHTML(
+		// 		"\t\t\t\t\t" . '<h2>' .
+		// 		wfMessage( 'blog-author-title' )
+		// 			->numParams( count( $this->authors ) )
+		// 			->escaped() . '</h2>' . "\n"
+		// 	);
 			// Why was this commented out? --ashley, 11 July 2011
-			if ( count( $this->authors ) > 1 ) {
-				$output->addHTML( $this->displayMultipleAuthorsMessage() );
-			}
+			// if ( count( $this->authors ) > 1 ) {
+			// 	$output->addHTML( $this->displayMultipleAuthorsMessage() );
+			// }
 
 			// Output each author's box in the order that they appear in [[Category:Opinions by X]]
-			for ( $x = 0; $x <= count( $this->authors ); $x++ ) {
-				$output->addHTML( $this->displayAuthorBox( $x ) );
-			}
+			// for ( $x = 0; $x <= count( $this->authors ); $x++ ) {
+			// 	$output->addHTML( $this->displayAuthorBox( $x ) );
+			// }
 
-			$output->addHTML( $this->recentEditors() );
-			$output->addHTML( $this->recentVoters() );
-			$output->addHTML( $this->embedWidget() );
+		// 	$output->addHTML( $this->recentEditors() );
+		// 	$output->addHTML( $this->recentVoters() );
+		// 	$output->addHTML( $this->embedWidget() );
 
-			$output->addHTML( '</div>' . "\n" );
+		// 	$output->addHTML( '</div>' . "\n" );
 
-			$output->addHTML( $this->leftAdUnit() );
-		}
+		// 	$output->addHTML( $this->leftAdUnit() );
+		// }
 
-		$output->addHTML( "\t\t\t" . '</div><!-- #blog-page-left -->' . "\n" );
+		// $output->addHTML( "\t\t\t" . '</div><!-- #blog-page-left -->' . "\n" );
 
-		$output->addHTML( '<div id="blog-page-middle">' . "\n" );
-		global $wgUseEditButtonFloat;
-		if ( $wgUseEditButtonFloat == true && method_exists( $sk, 'editMenu' ) ) {
-			$output->addHTML( $sk->editMenu() );
-		}
-		$output->addHTML( "<h1 class=\"page-title\">{$this->getTitle()->getText()}</h1>\n" );
-		$output->addHTML( $this->getByLine() );
+		// $output->addHTML( '<div id="blog-page-middle">' . "\n" );
+		// global $wgUseEditButtonFloat;
+		// if ( $wgUseEditButtonFloat == true && method_exists( $sk, 'editMenu' ) ) {
+		// 	$output->addHTML( $sk->editMenu() );
+		// }
+		// $output->addHTML( "<h1 class=\"page-title\">{$this->getTitle()->getText()}</h1>\n" );
+		// $output->addHTML( $this->getByLine() );
 
-		$output->addHTML( "\n<!--start Article::view-->\n" );
+		// $output->addHTML( "\n<!--start Article::view-->\n" );
 		parent::view();
 
 		// Get categories
-		$cat = $sk->getCategoryLinks();
-		if ( $cat ) {
-			$output->addHTML( "\n<div id=\"catlinks\" class=\"catlinks\">{$cat}</div>\n" );
-		}
+		// $cat = $sk->getCategoryLinks();
+		// if ( $cat ) {
+		// 	$output->addHTML( "\n<div id=\"catlinks\" class=\"catlinks\">{$cat}</div>\n" );
+		// }
 
-		$output->addHTML( "\n<!--end Article::view-->\n" );
+		// $output->addHTML( "\n<!--end Article::view-->\n" );
 
-		$output->addHTML( '</div>' . "\n" );
+		// $output->addHTML( '</div>' . "\n" );
 
-		if ( $wgBlogPageDisplay['rightcolumn'] == true ) {
-			$output->addHTML( '<div id="blog-page-right">' . "\n" );
+		// if ( $wgBlogPageDisplay['rightcolumn'] == true ) {
+		// 	$output->addHTML( '<div id="blog-page-right">' . "\n" );
 
-			$output->addHTML( $this->getPopularArticles() );
-			$output->addHTML( $this->getInTheNews() );
-			$output->addHTML( $this->getCommentsOfTheDay() );
-			$output->addHTML( $this->getRandomCasualGame() );
-			$output->addHTML( $this->getNewArticles() );
+		// 	$output->addHTML( $this->getPopularArticles() );
+		// 	$output->addHTML( $this->getInTheNews() );
+		// 	$output->addHTML( $this->getCommentsOfTheDay() );
+		// 	$output->addHTML( $this->getRandomCasualGame() );
+		// 	$output->addHTML( $this->getNewArticles() );
 
-			$output->addHTML( '</div>' . "\n" );
-		}
+		// 	$output->addHTML( '</div>' . "\n" );
+		// }
 
-		$output->addHTML( '<div class="cleared"></div>' . "\n" );
-		$output->addHTML( '</div><!-- #blog-page-container -->' . "\n" );
+		// $output->addHTML( '<div class="cleared"></div>' . "\n" );
+		// $output->addHTML( '</div><!-- #blog-page-container -->' . "\n" );
 	}
 
 	/**
@@ -148,33 +148,16 @@ class BlogPage extends Article {
 	 */
 	public function getAuthors() {
 		global $wgContLang;
+		if ($this->getTitle()->exists()){
+			$id = $this->getTitle()->getFirstRevision()->getUser();
+			$name = User::newFromId($id)->getName();
 
-		$articleText = $this->pageContent;
-		$categoryName = $wgContLang->getNsText( NS_CATEGORY );
-
-		// This unbelievably weak and hacky regex is used to find out the
-		// author's name from the category. See also getBlurb(), which uses a
-		// similar regex.
-		preg_match_all(
-			"/\[\[(?:(?:c|C)ategory|{$categoryName}):\s?" .
-				// This is an absolutely unholy, horribly hacky and otherwise
-				// less-than-ideal solution that likely works for English only
-				// Someone needs to come up with a better solution one of these
-				// days than this regex soup...
-				str_replace( ' $1', '', wfMessage( 'blog-by-user-category' )->inContentLanguage()->escaped() ) .
-			" (.*)\]\]/",
-			$articleText,
-			$matches
-		);
-		$authors = $matches[1];
-
-		foreach ( $authors as $author ) {
-			$authorUserId = User::idFromName( $author );
 			$this->authors[] = array(
-				'user_name' => trim( $author ),
-				'user_id' => $authorUserId
-			);
+				'user_name' => $name,
+				'user_id' => $id,
+			);			
 		}
+
 	}
 
 	/**

@@ -21,3 +21,10 @@ $aliases['fi'] = array(
 	'ArticleLists' => array( 'Artikkelilistat' ),
 	'CreateBlogPost' => array( 'Luo blogikirjoitus' ),
 );
+
+/** English */
+$aliases['zh'] = array(
+	'ArticlesHome' => array( 'ArticlesHome' ),
+	'ArticleLists' => array( '最新博客' ),
+	'CreateBlogPost' => array( 'CreateBlogPost' ),
+);
