@@ -352,8 +352,8 @@ class BlogPageHooks {
 		} 		
 	}
 
-	public static function onPreloadGetInput( $preload, $html){
-		$html += "<option value=''>博客</option>";
+	public static function onPreloadGetInput( &$preload, &$html){
+		$html .= "<option id='create-blog' value='' prefix='Blog:'>博客</option>";
 	}
 	/**
 	 * Show a list of this user's blog articles in their user profile page.

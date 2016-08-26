@@ -170,6 +170,7 @@ $wgHooks['UserProfileBeginLeft'][] = 'BlogPageHooks::getArticles';
 $wgHooks['ListDefinedTags'][] = 'BlogPageHooks::onRegisterTags';
 $wgHooks['ChangeTagsListActive'][] = 'BlogPageHooks::onRegisterTags';
 $wgHooks['RecentChange_save'][] = "BlogPageHooks::onRecentChange_save";
+$wgHooks['PreloadGetInput'][] = "BlogPageHooks::onPreloadGetInput";
 // Show blogs in profiles; this needs to be defined to prevent "undefined index" notices
 $wgUserProfileDisplay['articles'] = true;
 
