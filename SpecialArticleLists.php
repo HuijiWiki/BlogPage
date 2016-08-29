@@ -41,7 +41,8 @@ class ArticleLists extends IncludableSpecialPage {
 		$out->addModules('ext.blogPage.special.articlelist');
 		$this->setHeaders();
 		$out->addHtml('<div class="bloglist-container" data-mode="'.$mode.'" data-count="'.$count.'" data-user="'.$user.'"></div>');
-		$out->addHTML( $output );
+		$out->addHtml( Linker::linkKnown( SpecialPage::getTitleFor('NewPages'), wfMessage('blogpage-see-all')->text(), ['class'=>'btn pull-right btn-primary'], ['namespace' => '500' ]  ) );
+		// $out->addHTML( $output );
 	}
 
 	/**
