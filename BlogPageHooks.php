@@ -181,7 +181,7 @@ class BlogPageHooks {
 		global $wgTitle;
 		// don't assign author to anons... messes up logging stuff.
 		// plus it's all user_id based so it is impossible to differentiate one anon from another
-		if ($wgTitle->getNamespace() != NS_BLOG ){
+		if (!$wgTitle || $wgTitle->getNamespace() != NS_BLOG ){
 			return true;
 		}
 		if ($wgTitle->getFirstRevision() == null){
