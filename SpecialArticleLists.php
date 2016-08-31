@@ -22,13 +22,13 @@ class ArticleLists extends IncludableSpecialPage {
 	public function execute( $par ) {
 		global $wgMemc, $wgExtensionAssetsPath;
 		$params = explode('/', $par);
-		if ( $params[0] != '' && in_array( $params[0], ['list', 'expanded']) ){
+		if (  isset($params[0]) && $params[0] != '' && in_array( $params[0], ['list', 'expanded']) ){
 			$mode = $params[0];
 		} else {
 			$mode = 'expanded';
 		}
 		if ( isset($params[1]) && $params[1] != '' && is_integer($params[1]) && $params[1] <= 20){
-			$count = $params[0];
+			$count = $params[1];
 		} else {
 			$count = '5';
 		}
