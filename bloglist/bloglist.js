@@ -29,13 +29,18 @@ mw.bloglist = function (option, callback) {
 		type: 'POST',
 		success: function(data1) {
 			var theData = data1.query.recentchanges;
+			if (theData.length == 0){
+				var noblog = '<ul class="bloglist"><li><a class="empty-message">最近没有博客呦~<a></li></ul>';
+				callback($(noblog));
+				return;
+			}
 			var modeList ='<ul class="bloglist">'; 
 			for (var i = 0; i < theData.length; i++) {
 	 			data.recentChanges[i] = {
 	 				'heading': theData[i].title,
 	 				'author': theData[i].user,
 	 				'timestamp': new Date(Date.parse(theData[i].timestamp)).toLocaleString(),
-					'url':  encodeURIComponent('/wiki/'+theData[i].title)
+					'url':  '/wiki/'+encodeURIComponent(theData[i].title)
 	 			};
 				modeList += '<li><a href="' + encodeURIComponent(theData[i].title) + '">' + theData[i].title + '</a></li>' ;
 			}
@@ -62,7 +67,6 @@ mw.bloglist = function (option, callback) {
 				},
 				type: 'POST',
 				success: function(data2) {
-					console.log(data2);
 					var theData2 = data2.query.pages;
 					//console.log(theData2);
 					for (var key in theData2){
@@ -101,7 +105,6 @@ mw.bloglist = function (option, callback) {
 				},
 				type: 'POST',
 				success: function(data3) {
-					console.log(data3);
 					var theData3 = data3.query.pages;
 					for (var key in theData3){
 						for (var i in data.recentChanges ){
