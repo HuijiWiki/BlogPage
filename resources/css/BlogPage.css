@@ -3,9 +3,10 @@
 }
 @media (min-width: 992px){
 	div.col-md-4.secondary {
-	    width: 43.33333333%;
+	    width: 50%;
 	}
 	.col-md-2.bdsharebuttonbox {
-	    width: 26.66666667%;
+	    width: 50%;
+	    marigin-left: 0;
 	}
 }

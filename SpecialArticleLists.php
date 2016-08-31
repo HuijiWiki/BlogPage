@@ -27,12 +27,12 @@ class ArticleLists extends IncludableSpecialPage {
 		} else {
 			$mode = 'expanded';
 		}
-		if ( $params[1] != '' && is_integer($params[1]) && $params[1] <= 20){
+		if ( isset($params[1]) && $params[1] != '' && is_integer($params[1]) && $params[1] <= 20){
 			$count = $params[0];
 		} else {
 			$count = '5';
 		}
-		if ( $params[2] != ''){
+		if ( isset($params[2]) && $params[2] != ''){
 			$user = $params[2];
 		} else {
 			$user = null;

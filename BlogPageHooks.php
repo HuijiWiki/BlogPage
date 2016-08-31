@@ -334,7 +334,7 @@ class BlogPageHooks {
 			$wikitextCategories = implode( "\n", $categories );
 			
 			// Perform the edit
-			$newContent = ContentHandler::makeContent($text."\n".$wikitextCategories."\n__NOEDITSECTION__", $wikiPage->getTitle());
+			$newContent = ContentHandler::makeContent($text."\n".$wikitextCategories."\n__NOEDITSECTION__\n__NOTOC__", $wikiPage->getTitle());
 			$wikiPage->doEditContent(
 				$newContent,
 				wfMessage( 'blog-create-summary' )->inContentLanguage()->text(),
