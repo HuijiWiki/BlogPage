@@ -35,7 +35,7 @@ mw.bloglist = function (option, callback) {
 	 				'heading': theData[i].title,
 	 				'author': theData[i].user,
 	 				'timestamp': new Date(Date.parse(theData[i].timestamp)).toLocaleString(),
-					'url':  encodeURIComponent(theData[i].title)
+					'url':  encodeURIComponent('/wiki/'+theData[i].title)
 	 			};
 				modeList += '<li><a href="' + encodeURIComponent(theData[i].title) + '">' + theData[i].title + '</a></li>' ;
 			}
