@@ -177,4 +177,6 @@ $wgUserProfileDisplay['articles'] = true;
 //Right
 $wgAvailableRights[] = 'edit-others-blog';
 $wgGroupPermissions['sysop']['edit-others-blog'] = true;
+$wgGroupPermissions['staff']['edit-others-blog'] = true;
+$wgGroupPermissions['bureaucrat']['edit-others-blog'] = true;
 $wgNamespaceProtection[NS_BLOG] = 'edit-others-blog';
