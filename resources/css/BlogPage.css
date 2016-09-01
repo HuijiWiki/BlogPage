@@ -1,4 +1,4 @@
-.author-info > a{
+.author-info > a, .author-info > span{
 	position: relative;
 	top: -45px;
 	margin-bottom: -15px;
