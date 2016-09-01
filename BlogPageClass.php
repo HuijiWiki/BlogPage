@@ -334,12 +334,11 @@ class BlogPage extends Article {
 		}
 		$output = "\t\t\t\t\t<div class=\"well author-container$cssFix\">
 						<div class=\"author-info\">
-							".Linker::linkKnown($authorTitle)."
+							<a href=\"" . htmlspecialchars( $authorTitle->getFullURL() ) . "\" rel=\"nofollow\">
+								{$avatar->getAvatarURL()}
+							</a>
 							<div class=\"author-title\">
-								<a href=\"" . htmlspecialchars( $authorTitle->getFullURL() ) .
-									'" rel="nofollow">' .
-									wordwrap( $author_user_name, 12, "<br />\n", true ) .
-								'</a>
+								".Linker::linkKnown($authorTitle, $author_user_name)."
 							</div>';
 
 
