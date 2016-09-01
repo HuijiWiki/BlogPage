@@ -41,18 +41,23 @@ class BlogPageHooks {
 
 		return true;
 	}
-	public static function onSkinGetSub( $title, &$res ){
+	public static function onSkinGetSub( $title, &$res, $context ){
 		global $wgUser;
 		if ( $title->exists() && $title->getNamespace() == NS_BLOG ) {
-			$authorId = $title->getFirstRevision()->getUser();
+			$firstRev = $title->getFirstRevision();
+			$authorId = $firstRev->getUser();
 			$author = User::newFromId($authorId);
             $linkAttr = array('class' => 'mw-ui-anchor mw-ui-progressive mw-ui-quiet', 'rel'=>'nofollow');
             $editorAttr = array('class' => 'mw-ui-anchor mw-ui-progressive mw-ui-quiet mw-userlink', 'rel'=>'nofollow');
         	$authorLink = Linker::linkKnown($author->getUserPage(), $author->getName(), $editorAttr);
-        	$bjtime = strtotime( $title->getFirstRevision()->getTimestamp() ) + 8*60*60;
+        	$bjtime = strtotime( $firstRev->getTimestamp() ) + 8*60*60;
         	$createtime = HuijiFunctions::getTimeAgo( $bjtime );
-        	$diff = SpecialPage::getTitleFor('Diff',$revId);
-            $diffLink = Linker::LinkKnown($diff,'创作于',$linkAttr);
+        	$diff = SpecialPage::getTitleFor('Diff',$firstRev->getId());
+        	if (self::isOriginalWork( $title )){
+ 				$diffLink = Linker::LinkKnown($diff,'原创于',$linkAttr);
+        	} else {
+        		$diffLink = Linker::LinkKnown($diff,'发布于',$linkAttr);
+        	}
             $thankLink = '';
             if ( class_exists( 'EchoNotifier' )
                 && $wgUser->isLoggedIn() 
@@ -65,8 +70,37 @@ class BlogPageHooks {
             //Make it a td to reuse ext.thank.revthank   
             $res.= $authorLink.'&nbsp'.$diffLink.$createtime.'前'.$thankLink;
        		return false;
-
 		}
+	}
+	public static function isOriginalWork( $title ){
+		global $wgMemc;
+		// $res = PageProps::getInstance()->getProperties($title, 'originalwork');
+		// if (isset($res[$title->getArticleId()]) && $res[$title->getArticleId()] == '1' ){
+		// 	return true;
+		// } else {
+		// 	return false;
+		// }
+		$key = wfMemcKey('BlogPage', 'isOriginalWork', $title->getPrefixedText());
+		$result = $wgMemc->get($key);
+		if ($result != ''){
+			return $result;
+		} else {
+			$id = $title->getLatestRevID();
+			$dbr = wfGetDB('DB_SLAVE');
+			$res = $dbr->select(
+					'change_tag',
+					'ct_tag',
+					[ 'ct_rev_id' => $id  ],
+					__METHOD__
+				);
+			foreach ($res as $tag) {
+				if ($tag->ct_tag == 'originalwork'){
+					return true;
+				}
+			}
+			return false;			
+		}
+
 	}
 	public static function onSkinTemplateNavigation_Universal( &$sktemplate, &$links ) {
 		global $wgUser;
@@ -131,6 +165,9 @@ class BlogPageHooks {
 				'id' => 'hpChangeTags',
 				'value' => 'originalwork'
 			];
+			if (self::isOriginalWork($editpage->getTitle())){
+				$attribs['checked'] = 'checked';
+			}
 			$originalHtml = 
 				Xml::check( 'hpChangeTags', false, $attribs ) .
 				"&#160;<label for='hpChangeTags' id='mw-editpage-original'" .
@@ -154,8 +191,7 @@ class BlogPageHooks {
 	 * @return bool
 	 */
 	public static function onRecentChange_save( RecentChange $rc ) {
-		global $wgRequest;
-		// Paranoia -- permission check, just in case
+		global $wgRequest, $wgMemc;
 		if ( !$rc->getPerformer()->isAllowed( 'edit-others-blog' ) ) {
 			return true;
 		}
@@ -163,12 +199,16 @@ class BlogPageHooks {
 		$source = $rc->getAttribute( 'rc_source' );
 		// Only apply the tag for edits, nothing else, and only if we were given
 		// a tag to apply (!)
-		if ( in_array( $source, array( RecentChange::SRC_EDIT, RecentChange::SRC_NEW ) ) && $addTag ) {
-			$rcId = $rc->getAttribute( 'rc_id' );
-			$revId = $rc->getAttribute( 'rc_this_oldid' );
-			// In the future we might want to support different
-			// types of staff edit tags
-			ChangeTags::addTags( 'originalwork', $rcId, $revId );
+		if ( in_array( $source, array( RecentChange::SRC_EDIT, RecentChange::SRC_NEW ) ) ) {
+			if ($addTag){
+				$rcId = $rc->getAttribute( 'rc_id' );
+				$revId = $rc->getAttribute( 'rc_this_oldid' );
+				// In the future we might want to support different
+				// types of staff edit tags
+				ChangeTags::addTags( 'originalwork', $rcId, $revId );
+			}
+			$key = wfMemcKey('BlogPage', 'isOriginalWork', $rc->getTitle()->getPrefixedText());
+			$wgMemc->delete($key);
 		}
 		return true;
 	}
@@ -314,6 +354,41 @@ class BlogPageHooks {
 		if ( $wikiPage->getTitle()->getNamespace() == NS_BLOG ){
 			$stats = new UserStatsTrack( $user->getId(), $user->getName() );
 			$stats->incStatField( 'opinions_created' );	
+			// $localizedCategoryNS = $wgContLang->getNsText( NS_CATEGORY );	
+			// $today = $wgContLang->date( wfTimestampNow() );
+			// // The blog post will be by default categorized into two
+			// // categories, "Articles by User $1" and "(today's date)",
+			// // but the user may supply some categories themselves, so
+			// // we need to take those into account, too.
+			// $categories = array(
+			// 	'[[' . $localizedCategoryNS . ':' .
+			// 		wfMessage(
+			// 			'blog-by-user-category',
+			// 			$user->getName()
+			// 		)->inContentLanguage()->text() .
+			// 	']]' . "\n" .
+			// 	"[[{$localizedCategoryNS}:{$today}]]"
+			// );
+			// // Convert the array into a string
+			// $text = ContentHandler::getContentText($content);
+			// $wikitextCategories = implode( "\n", $categories );
+			
+			// // Perform the edit
+			// $newContent = ContentHandler::makeContent($text."\n".$wikitextCategories."\n__NOEDITSECTION__\n__NOTOC__", $wikiPage->getTitle());
+			// $wikiPage->doEditContent(
+			// 	$newContent,
+			// 	wfMessage( 'blog-create-summary' )->inContentLanguage()->text(),
+			// 	0,
+			// 	false,
+			// 	$user
+			// );
+		} 
+	}
+	public static function onPageContentSave( &$wikiPage, &$user, &$content, &$summary, 
+		$isMinor, $isWatch, $section, &$flags, &$status ) 
+	{ 
+		global $wgContLang;
+		if ($wikiPage->getTitle()->getNamespace() == NS_BLOG && !$wikiPage->getTitle()->exists()){
 			$localizedCategoryNS = $wgContLang->getNsText( NS_CATEGORY );	
 			$today = $wgContLang->date( wfTimestampNow() );
 			// The blog post will be by default categorized into two
@@ -334,15 +409,10 @@ class BlogPageHooks {
 			$wikitextCategories = implode( "\n", $categories );
 			
 			// Perform the edit
-			$newContent = ContentHandler::makeContent($text."\n".$wikitextCategories."\n__NOEDITSECTION__\n__NOTOC__", $wikiPage->getTitle());
-			$wikiPage->doEditContent(
-				$newContent,
-				wfMessage( 'blog-create-summary' )->inContentLanguage()->text(),
-				0,
-				false,
-				$user
-			);
-		} 
+			$newContent = ContentHandler::makeContent($text."\n".$wikitextCategories."\n__NOEDITSECTION__\n__NOTOC__", $wikiPage->getTitle());	
+			$content = $newContent;		
+		}
+
 	}
 	public static function decrOpinionCount( &$article, User &$user, $reason, &$error, &$status, $suppress ) { 
 		if ( $article->getTitle()->getNamespace() == NS_BLOG ){

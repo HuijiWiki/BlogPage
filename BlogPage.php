@@ -30,7 +30,7 @@ $wgNamespacesWithSubpages[NS_BLOG] = true;
 $wgPageImagesNamespaces[] = NS_BLOG;
 // Main module, used on *all* blog pages (see the hooks file)
 $wgResourceModules['ext.blogPage'] = array(
-	'styles' => 'resources/css/BlogPage.css',
+	'styles' => ['resources/css/BlogPage.css','resources/css/BlogPage.less'],
 	'localBasePath' => __DIR__,
 	'remoteExtPath' => 'BlogPage',
 	'position' => 'top'
@@ -92,10 +92,10 @@ $wgBlogPageDisplay = array(
 	'rightcolumn' => false,
 	// Display the box that contains some information about the author of the
 	// blog post?
-	'author' => false,
+	'author' => true,
 	// Display some (three, to be exact) other blog articles written by the
 	// same user?
-	'author_articles' => false,
+	'author_articles' => true,
 	// Display a list of people (complete with their avatars) who recently
 	// edited this blog post?
 	'recent_editors' => false,
@@ -163,6 +163,7 @@ $wgHooks['SkinGetSub'][] = 'BlogPageHooks::onSkinGetSub';
 $wgHooks['SkinTemplateNavigation::Universal'][] = 'BlogPageHooks::onSkinTemplateNavigation_Universal';
 $wgHooks['UserGetRights'][] = 'BlogPageHooks::AssignAuthor';
 $wgHooks['PageContentInsertComplete'][] = 'BlogPageHooks::incrOpinionCount';
+$wgHooks['PageContentSave'][] = 'BlogPageHooks::onPageContentSave';
 $wgHooks['ArticleDelete'][] = 'BlogPageHooks::decrOpinionCount';
 $wgHooks['EditPageBeforeEditChecks'][] = 'BlogPageHooks::onEditPageBeforeEditChecks';
 // UserProfile integration

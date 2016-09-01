@@ -11,6 +11,7 @@ class BlogPage extends Article {
 
 	public function __construct( Title $title ) {
 		parent::__construct( $title );
+		$this->title = $title;
 		$this->setContent();
 		$this->getAuthors();
 	}
@@ -53,11 +54,11 @@ class BlogPage extends Article {
 	public function view() {
 		global $wgBlogPageDisplay;
 
-		// $context = $this->getContext();
-		// $user = $context->getUser();
-		// $output = $context->getOutput();
+		$context = $this->getContext();
+		$user = $context->getUser();
+		$output = $context->getOutput();
 
-		// $sk = $context->getSkin();
+		$sk = $context->getSkin();
 
 		// wfDebugLog( 'BlogPage', __METHOD__ );
 
@@ -78,21 +79,19 @@ class BlogPage extends Article {
 
 		// 	$output->addHTML( "\t\t\t\t" . '<div class="blog-left-units">' . "\n" );
 
-		// 	$output->addHTML(
-		// 		"\t\t\t\t\t" . '<h2>' .
-		// 		wfMessage( 'blog-author-title' )
-		// 			->numParams( count( $this->authors ) )
-		// 			->escaped() . '</h2>' . "\n"
-		// 	);
+			// $output->addHTML(
+			// 	"\t\t\t\t\t" . '<h2>' .
+			// 	wfMessage( 'blog-author-title' )
+			// 		->numParams( count( $this->authors ) )
+			// 		->escaped() . '</h2>' . "\n"
+			// );
 			// Why was this commented out? --ashley, 11 July 2011
 			// if ( count( $this->authors ) > 1 ) {
 			// 	$output->addHTML( $this->displayMultipleAuthorsMessage() );
 			// }
 
 			// Output each author's box in the order that they appear in [[Category:Opinions by X]]
-			// for ( $x = 0; $x <= count( $this->authors ); $x++ ) {
-			// 	$output->addHTML( $this->displayAuthorBox( $x ) );
-			// }
+
 
 		// 	$output->addHTML( $this->recentEditors() );
 		// 	$output->addHTML( $this->recentVoters() );
@@ -114,13 +113,21 @@ class BlogPage extends Article {
 		// $output->addHTML( $this->getByLine() );
 
 		// $output->addHTML( "\n<!--start Article::view-->\n" );
+		$output->addHtml("<div class='col-md-8'>");
 		parent::view();
+		$output->addHtml("</div>");
+		$output->addHtml("<div class='col-md-4'>");
+		for ( $x = 0; $x <= count( $this->authors ); $x++ ) {
+			$output->addHTML( $this->displayAuthorBox( $x ) );
+		}		
+		$output->addHtml("</div><div class='clearfix'></div>");		
+
 
 		// Get categories
-		// $cat = $sk->getCategoryLinks();
-		// if ( $cat ) {
-		// 	$output->addHTML( "\n<div id=\"catlinks\" class=\"catlinks\">{$cat}</div>\n" );
-		// }
+		$cat = $sk->getCategoryLinks();
+		if ( $cat ) {
+			$output->addHTML( "\n<div id=\"catlinks-blog\" class=\"catlinks\">{$cat}</div>\n" );
+		}
 
 		// $output->addHTML( "\n<!--end Article::view-->\n" );
 
@@ -318,14 +325,14 @@ class BlogPage extends Article {
 		$profile = new UserProfile( $author_user_name );
 		$profileData = $profile->getProfile();
 
-		$avatar = new wAvatar( $author_user_id, 'm' );
+		$avatar = new wAvatar( $author_user_id, 'ml' );
 
 		$articles = $this->getAuthorArticles( $author_index );
 		$cssFix = '';
 		if ( !$articles ) {
 			$cssFix = ' author-container-fix';
 		}
-		$output = "\t\t\t\t\t<div class=\"author-container$cssFix\">
+		$output = "\t\t\t\t\t<div class=\"well author-container$cssFix\">
 						<div class=\"author-info\">
 							<a href=\"" . htmlspecialchars( $authorTitle->getFullURL() ) . "\" rel=\"nofollow\">
 								{$avatar->getAvatarURL()}
@@ -336,6 +343,8 @@ class BlogPage extends Article {
 									wordwrap( $author_user_name, 12, "<br />\n", true ) .
 								'</a>
 							</div>';
+
+
 		// If the user has supplied some information about themselves on their
 		// social profile, show that data here.
 		if ( $profileData['about'] ) {
@@ -345,7 +354,9 @@ class BlogPage extends Article {
 						<div class=\"cleared\"></div>
 					</div><!-- .author-container -->
 		{$this->getAuthorArticles( $author_index )}";
-
+		if  (BlogPageHooks::isOriginalWork($this->title)){
+			$output .= "<div class='well originalwork-notice'>".wfMessage('originalwork')->text()."</div>";
+		}
 		return $output;
 	}
 
@@ -425,7 +436,7 @@ class BlogPage extends Article {
 				$css_fix = ' more-container-fix';
 			}
 
-			$output .= "<div class=\"more-container{$css_fix}\">
+			$output .= "<div class=\"well more-container{$css_fix}\">
 			<h3>" . wfMessage( 'blog-author-more-by', $user_name )->escaped() . '</h3>';
 
 			$x = 1;
@@ -452,7 +463,7 @@ class BlogPage extends Article {
 			}
 
 			$output .= '<div class="author-archive-link">
-				<a href="' . htmlspecialchars( $archiveLink->getFullURL() ) . '">' .
+				<a class="btn btn-info" href="' . htmlspecialchars( $archiveLink->getFullURL() ) . '">' .
 					wfMessage( 'blog-view-archive-link' )->escaped() .
 				'</a>
 			</div>
@@ -1036,7 +1047,7 @@ class BlogPage extends Article {
 		global $wgMemc;
 
 		// Try cache first
-		$key = wfMemcKey( 'blog', 'vote', 'count' );
+		$key = wfMemcKey( 'blog', 'vote', 'count', $id );
 		$data = $wgMemc->get( $key );
 
 		if ( $data != '' ) {
@@ -1047,7 +1058,7 @@ class BlogPage extends Article {
 			$dbr = wfGetDB( DB_SLAVE );
 			$voteCount = (int)$dbr->selectField(
 				'Vote',
-				'COUNT(*) AS count',
+				'AVG(vote_value) AS count',
 				array( 'vote_page_id' => intval( $id ) ),
 				__METHOD__
 			);

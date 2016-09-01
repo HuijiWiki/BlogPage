@@ -1,12 +1,31 @@
-#wiki-body {
-	max-width: 800px !important;
+.author-info > a{
+	position: relative;
+	top: -45px;
+	margin-bottom: -15px;
 }
-@media (min-width: 992px){
-	div.col-md-4.secondary {
-	    width: 50%;
-	}
-	.col-md-2.bdsharebuttonbox {
-	    width: 50%;
-	    marigin-left: 0;
-	}
+.author-title a{
+	font-size: 1.6em;
+	display:inline;
+}
+.author-title{
+	margin-top: -30px;
+}
+.originalwork-notice {
+	font-size: 0.8em;
+}
+.author-container, .more-container, .originalwork-notice{
+	margin-left: 5px;
+	margin-top: 40px;
+	padding: 20px;
+}
+.more-container h3{
+	font-size: 0.8em;
+	font-weight: bold;
+	padding: 10px 0px !important;
+}
+.author-article-item{
+	padding: 10px 0px
+}
+.author-item-small{
+	font-size: 0.6em;
 }
