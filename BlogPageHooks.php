@@ -549,7 +549,7 @@ class BlogPageHooks {
 							"\">{$articleTitle->getText()}</a>
 						<span class=\"item-small secondary\">" .
 							wfMessage( 'blog-user-article-comment' )
-								->numParams( $UserStats )
+								->numParams( $commentCount )
 								->escaped() . '</span>
 					</span>
 				</div>';

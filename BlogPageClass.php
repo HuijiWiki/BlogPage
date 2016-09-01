@@ -113,6 +113,7 @@ class BlogPage extends Article {
 		// $output->addHTML( $this->getByLine() );
 
 		// $output->addHTML( "\n<!--start Article::view-->\n" );
+		$output->addHtml("<div class='row'>");
 		$output->addHtml("<div class='col-md-8'>");
 		parent::view();
 		$output->addHtml("</div>");
@@ -121,13 +122,14 @@ class BlogPage extends Article {
 			$output->addHTML( $this->displayAuthorBox( $x ) );
 		}		
 		$output->addHtml("</div><div class='clearfix'></div>");		
-
+		$output->addHtml("</div>");
 
 		// Get categories
 		$cat = $sk->getCategoryLinks();
 		if ( $cat ) {
 			$output->addHTML( "\n<div id=\"catlinks-blog\" class=\"catlinks\">{$cat}</div>\n" );
 		}
+
 
 		// $output->addHTML( "\n<!--end Article::view-->\n" );
 
