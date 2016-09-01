@@ -338,7 +338,7 @@ class BlogPage extends Article {
 								{$avatar->getAvatarURL()}
 							</a>
 							<div class=\"author-title\">
-								".Linker::linkKnown($authorTitle, $author_user_name)."
+								".Linker::linkKnown($authorTitle, $author_user_name).'
 							</div>';
 
 
