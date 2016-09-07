@@ -540,7 +540,7 @@ class BlogPageHooks {
 					$article['page_namespace'],
 					$article['page_title']
 				);
-				// $voteCount = BlogPage::getVotesForPage( $article['page_id'] );
+				$voteCount = BlogPage::getVotesForPage( $article['page_id'] );
 				$commentCount = BlogPage::getCommentsForPage( $article['page_id'] );
 				$divClass = 'activity-item';
 				$output .= '<div class="' . $divClass . "\">".
@@ -550,7 +550,10 @@ class BlogPageHooks {
 						<span class=\"item-small secondary\">" .
 							wfMessage( 'blog-user-article-comment' )
 								->numParams( $commentCount )
-								->escaped() . '</span>
+								->text() . "</span><span class=\"item-small secondary\">" .
+							wfMessage( 'blog-user-article-votes' )
+								->numParams( $voteCount )
+								->text() . '</span>
 					</span>
 				</div>';
 

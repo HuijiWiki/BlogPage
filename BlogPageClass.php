@@ -447,14 +447,14 @@ class BlogPage extends Article {
 					<a href="' . htmlspecialchars( $articleTitle->getFullURL() ) . "\">{$articleTitle->getText()}</a>
 					<div class=\"author-item-small\">" .
 						wfMessage(
-							'blog-author-votes',
+							'blog-user-articles-votes',
 							BlogPage::getVotesForPage( $article['page_id'] )
-						)->escaped() .
-						', ' .
+						)->text() .
+						'&nbsp; &nbsp;' .
 						wfMessage(
-							'blog-author-comments',
+							'blog-user-article-comment',
 							BlogPage::getCommentsForPage( $article['page_id'] )
-						)->escaped() .
+						)->text() .
 						'</div>
 				</div>';
 
