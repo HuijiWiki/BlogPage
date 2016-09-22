@@ -1,7 +1,7 @@
 $(document).ready(function(){
 	mw.loader.using('ext.blogPage.bloglist').done(function(){
 		$(".bloglist-container").each(function(){
-			$this = $(this);
+			var $this = $(this);
 			mw.bloglist(
 				{
 					count: $this.data('count'),

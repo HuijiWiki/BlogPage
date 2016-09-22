@@ -354,6 +354,7 @@ class BlogPageHooks {
 		if ( $wikiPage->getTitle()->getNamespace() == NS_BLOG ){
 			$stats = new UserStatsTrack( $user->getId(), $user->getName() );
 			$stats->incStatField( 'opinions_created' );	
+			Hooks::run('BlogPage::blogPost', [$wikiPage, $user, $content]);
 			// $localizedCategoryNS = $wgContLang->getNsText( NS_CATEGORY );	
 			// $today = $wgContLang->date( wfTimestampNow() );
 			// // The blog post will be by default categorized into two
@@ -418,7 +419,8 @@ class BlogPageHooks {
 		if ( $article->getTitle()->getNamespace() == NS_BLOG ){
 			$origUserId = $article->getTitle()->getFirstRevision()->getUser();
 			$stats = new UserStatsTrack( $origUserId );
-			$stats->decStatField( 'opinions_created' );			
+			$stats->decStatField( 'opinions_created' );	
+			Hooks::run('BlogPage::blogDelete', [$article, $user]);		
 		} 		
 	}
 
