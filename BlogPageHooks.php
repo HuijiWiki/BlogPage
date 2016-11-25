@@ -522,7 +522,7 @@ class BlogPageHooks {
 				<div class="user-section-actions">
 					<div class="action-right">';
 			if ( $articleCount > 5 ) {
-				$output .= '<a href="' . htmlspecialchars( $articleLink->getFullURL() ) .
+				$output .= '<a class="quiet" href="' . htmlspecialchars( $articleLink->getFullURL() ) .
 					'" rel="nofollow">' . wfMessage( 'user-view-all' )->escaped() . '</a>';
 			}
 			$output .= '</div>
