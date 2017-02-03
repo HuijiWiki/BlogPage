@@ -550,10 +550,10 @@ class BlogPageHooks {
 						<a href="' . htmlspecialchars( $articleTitle->getFullURL() ) .
 							"\">{$articleTitle->getText()}</a>
 						<span class=\"item-small secondary\">" .
-							wfMessage( 'blog-user-article-comment' )
+							wfMessage( 'blog-user-articles-comment' )
 								->numParams( $commentCount )
 								->text() . "</span><span class=\"item-small secondary\">" .
-							wfMessage( 'blog-user-article-votes' )
+							wfMessage( 'blog-user-articles-votes' )
 								->numParams( $voteCount )
 								->text() . '</span>
 					</span>
