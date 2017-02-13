@@ -452,7 +452,7 @@ class BlogPage extends Article {
 						)->text() .
 						'&nbsp; &nbsp;' .
 						wfMessage(
-							'blog-user-article-comment',
+							'blog-user-articles-comment',
 							BlogPage::getCommentsForPage( $article['page_id'] )
 						)->text() .
 						'</div>
